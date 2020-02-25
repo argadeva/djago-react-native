@@ -31,9 +31,9 @@ import {
 } from '../redux/actions/products';
 import {getCategories} from '../redux/actions/categories';
 import {Modal, Alert, Image} from 'react-native';
-import {Col, Grid} from 'react-native-easy-grid';
 import AsyncStorage from '@react-native-community/async-storage';
 import BottomNav from '../components/BottomNav';
+import ImagePicker from 'react-native-image-picker';
 
 export class Products extends Component {
   state = {
@@ -56,6 +56,7 @@ export class Products extends Component {
     sort: 'created_at',
     modal: false,
     formModal: false,
+    avatarSource: null,
   };
 
   getProducts = async () => {
@@ -121,6 +122,7 @@ export class Products extends Component {
 
   handleUpdate = data => {
     this.setState({
+      avatarSource: null,
       modal: true,
       image: false,
       editData: {
@@ -138,6 +140,7 @@ export class Products extends Component {
 
   handleAdd = () => {
     this.setState({
+      avatarSource: null,
       formModal: true,
       image: false,
       editData: {
@@ -161,12 +164,102 @@ export class Products extends Component {
     });
   };
 
+  handleChoosePhoto = () => {
+    const options = {
+      title: 'Select Avatar',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+
+    ImagePicker.showImagePicker(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        this.setState({
+          avatarSource: response,
+        });
+      }
+    });
+  };
+
+  handleSubmit = async () => {
+    if (this.state.editData.id !== null) {
+      this.props
+        .dispatch(
+          editProducts(
+            this.state.editData,
+            this.state.userToken,
+            this.state.avatarSource,
+          ),
+        )
+        .then(() => {
+          let id = this.state.editData.id;
+          const index = this.state.productData.findIndex(function(onData) {
+            return onData.id === id;
+          });
+          let catId = parseInt(this.state.editData.category_id);
+          let index2 = this.state.categoriesData.findIndex(x => x.id === catId);
+          let datas = [...this.state.productData];
+          let data = {...datas[index]};
+          data.name = this.state.editData.name;
+          data.image =
+            this.state.avatarSource.fileName === undefined
+              ? this.state.editData.image
+              : 'http://54.173.43.255:1000/uploads/' +
+                'file-' +
+                this.state.avatarSource.fileName;
+          data.price = this.state.editData.price;
+          data.category_id = this.state.editData.category_id;
+          data.categories = this.state.categoriesData[index2].name;
+          data.stock = this.state.editData.stock;
+          data.description = this.state.editData.description;
+          datas[index] = data;
+          this.setState({productData: datas});
+        });
+    } else {
+      this.props
+        .dispatch(
+          addProducts(
+            this.state.editData,
+            this.state.userToken,
+            this.state.avatarSource,
+          ),
+        )
+        .then(() => {
+          let catId = parseInt(this.state.editData.category_id);
+          let index = this.state.categoriesData.findIndex(x => x.id === catId);
+          let newData = {
+            id: this.props.products.addIdData,
+            name: this.state.editData.name,
+            price: this.state.editData.price,
+            image:
+              this.state.avatarSource.fileName === undefined
+                ? ''
+                : 'http://54.173.43.255:1000/uploads/' +
+                  'file-' +
+                  this.state.avatarSource.fileName,
+            categories: this.state.categoriesData[index].name,
+            stock: this.state.editData.stock,
+            description: this.state.editData.description,
+          };
+
+          this.setState({
+            productData: this.state.productData.concat(newData),
+          });
+        });
+    }
+  };
+
   render() {
     function formatNumber(num) {
       return 'Rp. ' + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
     }
-
-    console.log(this.state.editData.category_id);
 
     return (
       <Container>
@@ -230,7 +323,7 @@ export class Products extends Component {
                     <Thumbnail
                       square
                       resizeMode={'cover'}
-                      style={{width: '100%', height: 200}}
+                      style={{width: '100%', height: 300}}
                       source={{uri: this.state.editData.image}}
                     />
                     <CardItem header bordered>
@@ -295,14 +388,36 @@ export class Products extends Component {
                           : 'Update User'}
                       </Text>
                     </CardItem>
-                    {this.state.editData.image !== '' ? (
-                      <Thumbnail
-                        square
-                        resizeMode={'cover'}
-                        style={{width: '100%', height: 200}}
-                        source={{uri: this.state.editData.image}}
-                      />
-                    ) : null}
+                    {this.state.avatarSource === null ? (
+                      <>
+                        {this.state.editData.image !== '' ? (
+                          <Thumbnail
+                            square
+                            resizeMode={'cover'}
+                            style={{width: '100%', height: 300}}
+                            source={{uri: this.state.editData.image}}
+                          />
+                        ) : null}
+                      </>
+                    ) : (
+                      <>
+                        {this.state.avatarSource && (
+                          <Thumbnail
+                            square
+                            resizeMode={'cover'}
+                            style={{width: '100%', height: 300}}
+                            source={this.state.avatarSource}
+                          />
+                        )}
+                      </>
+                    )}
+                    <Button primary onPress={() => this.handleChoosePhoto()}>
+                      <Text>
+                        {this.state.editData.id === null
+                          ? 'Add Image'
+                          : 'Update Image'}
+                      </Text>
+                    </Button>
                     <Form style={{marginHorizontal: 10}}>
                       <Item stackedLabel>
                         <Label>Name</Label>
