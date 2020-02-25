@@ -1,9 +1,8 @@
 import Axios from 'axios';
 
-const token =
-  '1#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXN1bHRzIjp7ImlkIjoxLCJuYW1lIjoiQWRtaW4iLCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInRva2VuIjpudWxsfSwiaWF0IjoxNTgyNDc2Nzc0LCJleHAiOjE1ODMwODE1NzR9.HCaFI_7L_x2Fl3KsGI3HRjY0gwJw_NWxjAwhrhinxco';
+export const getProducts = token => {
+  console.log(token);
 
-export const getProducts = () => {
   return {
     type: 'GET_PRODUCTS',
     payload: Axios.get('http://54.173.43.255:1000/api/v1/products/onstock', {
@@ -12,7 +11,7 @@ export const getProducts = () => {
   };
 };
 
-export const addProducts = editData => {
+export const addProducts = (editData, token) => {
   const bodyFormData = new FormData();
   bodyFormData.append('name', editData.name);
   bodyFormData.append('description', editData.description);
@@ -35,7 +34,7 @@ export const addProducts = editData => {
   };
 };
 
-export const editProducts = editData => {
+export const editProducts = (editData, token) => {
   const bodyFormData = new FormData();
   bodyFormData.append('name', editData.name);
   bodyFormData.append('description', editData.description);
@@ -58,7 +57,7 @@ export const editProducts = editData => {
   };
 };
 
-export const deleteProducts = id => {
+export const deleteProducts = (id, token) => {
   return {
     type: 'DELETE_PRODUCTS',
     payload: Axios.delete(`http://54.173.43.255:1000/api/v1/products/${id}`, {

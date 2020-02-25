@@ -1,9 +1,6 @@
 import Axios from 'axios';
 
-const token =
-  '1#eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXN1bHRzIjp7ImlkIjoxLCJuYW1lIjoiQWRtaW4iLCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInRva2VuIjpudWxsfSwiaWF0IjoxNTgyNDc2Nzc0LCJleHAiOjE1ODMwODE1NzR9.HCaFI_7L_x2Fl3KsGI3HRjY0gwJw_NWxjAwhrhinxco';
-
-export const getCategories = () => {
+export const getCategories = token => {
   return {
     type: 'GET_CATEGORIES',
     payload: Axios.get('http://54.173.43.255:1000/api/v1/categories', {
@@ -12,7 +9,7 @@ export const getCategories = () => {
   };
 };
 
-export const addCategories = data => {
+export const addCategories = (data, token) => {
   return {
     type: 'ADD_CATEGORIES',
     payload: Axios.post(
@@ -25,7 +22,7 @@ export const addCategories = data => {
   };
 };
 
-export const editCategories = editData => {
+export const editCategories = (editData, token) => {
   return {
     type: 'EDIT_CATEGORIES',
     payload: Axios.patch(
@@ -38,7 +35,7 @@ export const editCategories = editData => {
   };
 };
 
-export const deleteCategories = id => {
+export const deleteCategories = (id, token) => {
   return {
     type: 'DELETE_CATEGORIES',
     payload: Axios.delete(`http://54.173.43.255:1000/api/v1/categories/${id}`, {

@@ -18,6 +18,9 @@ import {
   Item,
   Label,
   Input,
+  Card,
+  CardItem,
+  Picker,
 } from 'native-base';
 import {connect} from 'react-redux';
 import {
@@ -27,10 +30,14 @@ import {
   deleteProducts,
 } from '../redux/actions/products';
 import {getCategories} from '../redux/actions/categories';
-import {Modal, Alert} from 'react-native';
+import {Modal, Alert, Image} from 'react-native';
+import {Col, Grid} from 'react-native-easy-grid';
+import AsyncStorage from '@react-native-community/async-storage';
+import BottomNav from '../components/BottomNav';
 
 export class Products extends Component {
   state = {
+    userToken: '',
     productData: [],
     totalPage: '',
     empty: '',
@@ -42,34 +49,79 @@ export class Products extends Component {
       category_id: null,
       stock: 0,
       description: '',
+      categories: '',
     },
     image: false,
     categoriesData: [],
     sort: 'created_at',
     modal: false,
+    formModal: false,
   };
 
   getProducts = async () => {
-    await this.props.dispatch(getProducts());
+    await this.props.dispatch(getProducts(this.state.userToken));
     this.setState({
       productData: this.props.products.productData.result,
     });
   };
 
   getCategories = async () => {
-    await this.props.dispatch(getCategories());
+    await this.props.dispatch(getCategories(this.state.userToken));
     this.setState({
       categoriesData: this.props.categories.categoriesData.result,
     });
   };
 
+  getToken = async () => {
+    try {
+      const value = await AsyncStorage.getItem('usertoken');
+      if (value !== null) {
+        this.setState({
+          userToken: value,
+        });
+      }
+    } catch (e) {
+      e;
+    }
+  };
+
   componentDidMount() {
-    this.getProducts();
-    this.getCategories();
+    this.getToken();
+    setTimeout(() => {
+      this.getProducts();
+      this.getCategories();
+    }, 1000);
   }
+
+  alertDelete = id => {
+    Alert.alert(
+      'Warning!',
+      'Are you sure you delete this?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => this.handleRemove(id)},
+      ],
+      {cancelable: false},
+    );
+  };
+
+  handleRemove = id => {
+    this.props.dispatch(deleteProducts(id, this.state.userToken)).then(() => {
+      const index = this.state.productData.findIndex(function(onData) {
+        return onData.id === id;
+      });
+      let array = [...this.state.productData];
+      array.splice(index, 1);
+      this.setState({productData: array});
+    });
+  };
 
   handleUpdate = data => {
     this.setState({
+      modal: true,
       image: false,
       editData: {
         id: data.id,
@@ -79,14 +131,33 @@ export class Products extends Component {
         category_id: data.category_id,
         stock: data.stock,
         description: data.description,
+        categories: data.categories,
       },
-      modal: true,
     });
   };
 
-  setModal = visible => {
+  handleAdd = () => {
     this.setState({
-      modal: visible,
+      formModal: true,
+      image: false,
+      editData: {
+        id: null,
+        name: '',
+        image: '',
+        price: 0,
+        category_id: null,
+        stock: 0,
+        description: '',
+        categories: '',
+      },
+    });
+  };
+
+  handleFormChange = (key, value) => {
+    const editDatas = this.state.editData;
+    editDatas[key] = value;
+    this.setState({
+      editDatas,
     });
   };
 
@@ -94,6 +165,9 @@ export class Products extends Component {
     function formatNumber(num) {
       return 'Rp. ' + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
     }
+
+    console.log(this.state.editData.category_id);
+
     return (
       <Container>
         <Header>
@@ -106,57 +180,215 @@ export class Products extends Component {
             <Title>Products</Title>
           </Body>
           <Right>
-            <Button transparent>
+            <Button transparent onPress={() => this.handleAdd()}>
               <Icon name="add" />
             </Button>
           </Right>
         </Header>
-        {!this.props.categories.isPending ? (
-          <Content>
-            <List>
-              {this.state.productData.map(product => {
-                return (
-                  <ListItem thumbnail key={product.id}>
-                    <Left>
+        <Content style={{paddingHorizontal: 0}}>
+          {!this.props.products.isPending ? (
+            <>
+              <List>
+                {this.state.productData.map(product => {
+                  return (
+                    <ListItem thumbnail key={product.id}>
+                      <Left>
+                        <Thumbnail
+                          source={{
+                            uri: `${product.image}`,
+                          }}
+                        />
+                      </Left>
+                      <Body>
+                        <Text numberOfLines={1}>{product.name}</Text>
+                        <Text note numberOfLines={1}>
+                          {formatNumber(product.price)}
+                        </Text>
+                      </Body>
+                      <Right>
+                        <Button
+                          transparent
+                          onPress={() => this.handleUpdate(product)}>
+                          <Text>Detail</Text>
+                        </Button>
+                      </Right>
+                    </ListItem>
+                  );
+                })}
+              </List>
+              <Modal
+                animationType="slide"
+                transparent={false}
+                visible={this.state.modal}>
+                <Button
+                  transparent
+                  onPress={() => this.setState({modal: false})}>
+                  <Icon name="close" />
+                </Button>
+                <Content padder>
+                  <Card>
+                    <Thumbnail
+                      square
+                      resizeMode={'cover'}
+                      style={{width: '100%', height: 200}}
+                      source={{uri: this.state.editData.image}}
+                    />
+                    <CardItem header bordered>
+                      <Text>Name : {this.state.editData.name}</Text>
+                    </CardItem>
+                    <CardItem bordered>
+                      <Text>Categories : {this.state.editData.categories}</Text>
+                    </CardItem>
+                    <CardItem bordered>
+                      <Text>
+                        Price : {formatNumber(this.state.editData.price)}
+                      </Text>
+                    </CardItem>
+                    <CardItem bordered>
+                      <Text>Stock : {this.state.editData.stock}</Text>
+                    </CardItem>
+                    <CardItem bordered>
+                      <Text>
+                        Description : {this.state.editData.description}
+                      </Text>
+                    </CardItem>
+                    <CardItem footer bordered>
+                      <Left>
+                        <Button
+                          transparent
+                          onPress={() =>
+                            this.setState({modal: false, formModal: true})
+                          }>
+                          <Icon style={{color: 'orange'}} name="ios-create" />
+                          <Text style={{color: 'orange'}}>Update</Text>
+                        </Button>
+                      </Left>
+                      <Right>
+                        <Button
+                          transparent
+                          onPress={() =>
+                            this.alertDelete(this.state.editData.id)
+                          }>
+                          <Icon style={{color: 'red'}} name="ios-trash" />
+                          <Text style={{color: 'red'}}>Trash</Text>
+                        </Button>
+                      </Right>
+                    </CardItem>
+                  </Card>
+                </Content>
+              </Modal>
+              <Modal
+                animationType="slide"
+                transparent={false}
+                visible={this.state.formModal}>
+                <Button
+                  transparent
+                  onPress={() => this.setState({formModal: false})}>
+                  <Icon name="close" />
+                </Button>
+                <Content padder>
+                  <Card>
+                    <CardItem header>
+                      <Text>
+                        {this.state.editData.id === null
+                          ? 'Add User'
+                          : 'Update User'}
+                      </Text>
+                    </CardItem>
+                    {this.state.editData.image !== '' ? (
                       <Thumbnail
                         square
-                        source={{
-                          uri: `${product.image}`,
-                        }}
+                        resizeMode={'cover'}
+                        style={{width: '100%', height: 200}}
+                        source={{uri: this.state.editData.image}}
                       />
-                    </Left>
-                    <Body>
-                      <Text numberOfLines={1}>{product.name}</Text>
-                      <Text note numberOfLines={1}>
-                        {formatNumber(product.price)}
-                      </Text>
-                    </Body>
-                    <Right>
-                      <Button
-                        transparent
-                        onPress={() => this.handleUpdate(product)}>
-                        <Text>Detail</Text>
-                      </Button>
-                    </Right>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Content>
-        ) : (
-          <Spinner color="blue" />
-        )}
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={this.state.modal}>
-          <Button transparent onPress={() => this.setModal(false)}>
-            <Icon name="close" />
-          </Button>
-          <Content style={{padding: 20}}>
-            <Text>{this.state.editData.name}</Text>
-          </Content>
-        </Modal>
+                    ) : null}
+                    <Form style={{marginHorizontal: 10}}>
+                      <Item stackedLabel>
+                        <Label>Name</Label>
+                        <Input
+                          defaultValue={this.state.editData.name}
+                          onChangeText={name =>
+                            this.handleFormChange('name', name)
+                          }
+                        />
+                      </Item>
+                      <Item stackedLabel style={{borderBottomWidth: 0}}>
+                        <Label>Categories</Label>
+                        <Item picker>
+                          <Picker
+                            mode="dropdown"
+                            iosIcon={<Icon name="arrow-down" />}
+                            style={{width: undefined}}
+                            placeholder="Select Categories"
+                            placeholderStyle={{color: '#bfc6ea'}}
+                            placeholderIconColor="#007aff"
+                            selectedValue={this.state.editData.category_id}
+                            onValueChange={cat =>
+                              this.handleFormChange('category_id', cat)
+                            }>
+                            {this.state.categoriesData.map(categori => {
+                              return (
+                                <Picker.Item
+                                  key={categori.id}
+                                  label={categori.name}
+                                  value={categori.id}
+                                />
+                              );
+                            })}
+                          </Picker>
+                        </Item>
+                      </Item>
+
+                      <Item stackedLabel>
+                        <Label>Price</Label>
+                        <Input
+                          defaultValue={this.state.editData.price.toString()}
+                          keyboardType="numeric"
+                          onChangeText={price =>
+                            this.handleFormChange('price', price)
+                          }
+                        />
+                      </Item>
+                      <Item stackedLabel>
+                        <Label>Stock</Label>
+                        <Input
+                          defaultValue={this.state.editData.stock.toString()}
+                          keyboardType="numeric"
+                          onChangeText={stock =>
+                            this.handleFormChange('stock', stock)
+                          }
+                        />
+                      </Item>
+                      <Item stackedLabel>
+                        <Label>Description</Label>
+                        <Input
+                          defaultValue={this.state.editData.description}
+                          onChangeText={description =>
+                            this.handleFormChange('description', description)
+                          }
+                        />
+                      </Item>
+                    </Form>
+                    <CardItem footer bordered>
+                      <Left />
+                      <Right>
+                        <Button success onPress={() => this.handleSubmit()}>
+                          <Text>
+                            {this.state.editData.id === null ? 'Add' : 'Update'}
+                          </Text>
+                        </Button>
+                      </Right>
+                    </CardItem>
+                  </Card>
+                </Content>
+              </Modal>
+            </>
+          ) : (
+            <Spinner color="blue" style={{height: 500}} />
+          )}
+        </Content>
+        <BottomNav menu={this.props} products={true} />
       </Container>
     );
   }
