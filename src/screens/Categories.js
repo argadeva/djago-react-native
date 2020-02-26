@@ -161,7 +161,10 @@ export class Categories extends Component {
   render() {
     return (
       <Container>
-        <Header>
+        <Header
+          style={{backgroundColor: '#C02739'}}
+          iosBarStyle="light-content"
+          androidStatusBarColor="#84142D">
           <Left>
             <Button transparent>
               <Icon name="ios-apps" />

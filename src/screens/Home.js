@@ -17,11 +17,13 @@ import {
   Left,
   Body,
   Right,
+  Card,
+  CardItem,
 } from 'native-base';
 import {Row, Grid, Col} from 'react-native-easy-grid';
 import {connect} from 'react-redux';
 import {getProducts} from '../redux/actions/products';
-import {TouchableOpacity, Modal} from 'react-native';
+import {TouchableOpacity, Modal, StyleSheet} from 'react-native';
 import {checkout, getCheckoutDetail} from '../redux/actions/checkout';
 import Axios from 'axios';
 import qs from 'qs';
@@ -37,6 +39,7 @@ export class Home extends Component {
     modal: false,
     userToken: '',
     modal2: false,
+    isCheckoutLoading: true,
   };
 
   setModal = visible => {
@@ -126,11 +129,12 @@ export class Home extends Component {
     await this.props.dispatch(getCheckoutDetail(idCheckout, token));
     this.setState({
       checkoutDetail: this.props.checkout.checkoutDetailData.result,
-      modal2: true,
+      isCheckoutLoading: false,
     });
   };
 
   submitCart = async () => {
+    this.setState({modal2: true});
     if (this.state.carts.length !== 0) {
       const number = Date.now();
       await Axios.post(
@@ -185,7 +189,10 @@ export class Home extends Component {
 
     return (
       <Container>
-        <Header>
+        <Header
+          style={{backgroundColor: '#C02739'}}
+          iosBarStyle="light-content"
+          androidStatusBarColor="#84142D">
           <Grid style={{padding: 10}}>
             <Row>
               <Item rounded style={{width: '80%', borderBottomWidth: 1}}>
@@ -206,10 +213,13 @@ export class Home extends Component {
                 <Icon name="ios-cart" />
                 <Badge
                   style={{
+                    backgroundColor: '#ffd082',
                     position: 'absolute',
                     right: 0,
                   }}>
-                  <Text>{this.state.carts.length}</Text>
+                  <Text style={{color: '#84142D'}}>
+                    {this.state.carts.length}
+                  </Text>
                 </Badge>
               </Button>
             </Row>
@@ -243,11 +253,21 @@ export class Home extends Component {
                                 height: 165,
                                 width: 165,
                                 resizeMode: 'stretch',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                               }}
                               source={{
                                 uri: products.image,
                               }}
                             />
+                            {index >= 0 ? (
+                              <View style={styles.overlay}>
+                                <Icon
+                                  name="ios-checkmark-circle-outline"
+                                  style={{maxWidth: '50%', color: 'white'}}
+                                />
+                              </View>
+                            ) : null}
                           </TouchableOpacity>
                           <Text numberOfLines={1} style={{paddingLeft: 5}}>
                             {products.name}
@@ -261,9 +281,11 @@ export class Home extends Component {
                   )}
                 </Row>
               ) : this.state.search !== '' ? (
-                <Text style={{flex: 1}}>Product Not Found</Text>
+                <Text style={{marginHorizontal: '30%', marginTop: 50}}>
+                  Product Not Found
+                </Text>
               ) : (
-                <Spinner color="blue" style={{flex: 1}} />
+                <Spinner color="blue" style={{height: 500, flex: 1}} />
               )}
             </Grid>
           ) : (
@@ -278,7 +300,7 @@ export class Home extends Component {
             </Button>
             <Content>
               {this.state.carts.length === 0 ? (
-                <Text style={{flex: 1}}>No Product</Text>
+                <Text style={{textAlign: 'center'}}>No Product</Text>
               ) : (
                 this.state.carts.map(cartList => {
                   return (
@@ -336,10 +358,17 @@ export class Home extends Component {
                 <Text style={{padding: 20, alignSelf: 'flex-end'}}>
                   Total: {countTotals}
                 </Text>
-                <Button full onPress={() => this.submitCart()}>
+                <Button
+                  style={{backgroundColor: '#151965'}}
+                  full
+                  onPress={() => this.submitCart()}>
                   <Text>Checkout</Text>
                 </Button>
-                <Button full danger onPress={() => this.cancelCart()}>
+                <Button
+                  style={{backgroundColor: '#C02739'}}
+                  full
+                  danger
+                  onPress={() => this.cancelCart()}>
                   <Text>Cancel</Text>
                 </Button>
               </>
@@ -352,47 +381,85 @@ export class Home extends Component {
             <Button
               transparent
               onPress={() =>
-                this.setState({modal2: false, checkoutDetail: []})
+                this.setState({
+                  modal2: false,
+                  checkoutDetail: [],
+                  isCheckoutLoading: true,
+                })
               }>
               <Icon name="close" />
             </Button>
-            <Content>
-              <Text>Checkout</Text>
-              <Text>
-                Cashier: {this.props.checkout.checkoutDetailData.name}
-              </Text>
-              <Text>
-                Reciept no:
-                {this.props.checkout.checkoutDetailData.order_number}
-              </Text>
-              {this.state.checkoutDetail === '' ? (
-                <>
+            {this.state.isCheckoutLoading ? (
+              <Spinner color="blue" style={{height: 500, flex: 1}} />
+            ) : (
+              <>
+                <Card style={{marginLeft: 20, marginRight: 20}}>
+                  <CardItem>
+                    <Body>
+                      <Text style={{alignSelf: 'center'}}>Orders Detail</Text>
+                      <Text style={{alignSelf: 'center'}}>
+                        {this.props.checkout.checkoutDetailData.order_number}
+                      </Text>
+                      <Text style={{alignSelf: 'center'}}>
+                        {this.props.checkout.checkoutDetailData.name}
+                      </Text>
+                    </Body>
+                  </CardItem>
+                </Card>
+                <Card style={{marginLeft: 20, marginRight: 20}}>
                   {this.props.checkout.checkoutDetailData.products.map(
                     detail => {
                       return (
-                        <>
-                          <Text>{detail.name + '  ' + detail.qty}x</Text>
-                          <Text>{formatNumber(detail.total)}</Text>
-                        </>
+                        <CardItem key={detail.id}>
+                          <Left>
+                            <Text>{detail.name + '  ' + detail.qty}x</Text>
+                          </Left>
+                          <Right>
+                            <Text>{formatNumber(detail.total)}</Text>
+                          </Right>
+                        </CardItem>
                       );
                     },
                   )}
-                </>
-              ) : null}
-              <Text>
-                Ppn 10%
-                {formatNumber(
-                  parseInt(this.props.checkout.checkoutDetailData.ppn),
-                )}
-              </Text>
-              <Text>
-                Total:
-                {formatNumber(
-                  parseInt(this.props.checkout.checkoutDetailData.total),
-                )}
-              </Text>
-              <Text>Payment: Cash</Text>
-            </Content>
+                </Card>
+                <Card style={{marginLeft: 20, marginRight: 20}}>
+                  <CardItem>
+                    <Left>
+                      <Text>Ppn 10%</Text>
+                    </Left>
+                    <Right>
+                      <Text>
+                        {formatNumber(
+                          parseInt(this.props.checkout.checkoutDetailData.ppn),
+                        )}
+                      </Text>
+                    </Right>
+                  </CardItem>
+                  <CardItem>
+                    <Left>
+                      <Text>Total</Text>
+                    </Left>
+                    <Right>
+                      <Text>
+                        {formatNumber(
+                          parseInt(
+                            this.props.checkout.checkoutDetailData.total,
+                          ),
+                        )}
+                      </Text>
+                    </Right>
+                  </CardItem>
+                  <CardItem>
+                    <Left>
+                      <Text>Payment</Text>
+                    </Left>
+                    <Right>
+                      <Text>Cash</Text>
+                    </Right>
+                  </CardItem>
+                </Card>
+              </>
+            )}
           </Modal>
         </Content>
         <BottomNav menu={this.props} home={true} />
@@ -400,6 +467,15 @@ export class Home extends Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 const mapStateToProps = ({products, checkout}) => {
   return {

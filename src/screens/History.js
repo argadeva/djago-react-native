@@ -31,6 +31,7 @@ export class History extends Component {
     detailData: [],
     modal: false,
     userToken: '',
+    isLoadingDetail: true,
   };
 
   getToken = async () => {
@@ -69,10 +70,13 @@ export class History extends Component {
   };
 
   handleDetail = id => {
+    this.setState({
+      modal: true,
+    });
     this.props
       .dispatch(getCheckoutDetail(id, this.state.userToken))
       .then(result => {
-        this.setState({detailData: result.value.data, modal: true});
+        this.setState({detailData: result.value.data, isLoadingDetail: false});
       });
   };
 
@@ -89,7 +93,10 @@ export class History extends Component {
     let lastYearIncome = this.state.historyData.lastYearIncome;
     return (
       <Container>
-        <Header>
+        <Header
+          style={{backgroundColor: '#C02739'}}
+          iosBarStyle="light-content"
+          androidStatusBarColor="#84142D">
           <Left>
             <Button transparent>
               <Icon name="ios-paper" />
@@ -98,6 +105,7 @@ export class History extends Component {
           <Body>
             <Title>History</Title>
           </Body>
+          <Right />
         </Header>
         <Content>
           {this.state.checkoutData.length > 0 ? (
@@ -204,68 +212,78 @@ export class History extends Component {
                 visible={this.state.modal}>
                 <Button
                   transparent
-                  onPress={() => this.setState({modal: false})}>
+                  onPress={() =>
+                    this.setState({modal: false, isLoadingDetail: true})
+                  }>
                   <Icon name="close" />
                 </Button>
-                <Card style={{marginLeft: 20, marginRight: 20}}>
-                  <CardItem>
-                    <Body>
-                      <Text style={{alignSelf: 'center'}}>Orders Detail</Text>
-                      <Text style={{alignSelf: 'center'}}>
-                        {this.state.detailData.order_number}
-                      </Text>
-                      <Text style={{alignSelf: 'center'}}>
-                        {this.state.detailData.name}
-                      </Text>
-                    </Body>
-                  </CardItem>
-                </Card>
-                {this.state.detailData.products !== undefined ? (
-                  <Card style={{marginLeft: 20, marginRight: 20}}>
-                    {this.state.detailData.products.map(detail => {
-                      return (
-                        <CardItem key={detail.id}>
-                          <Left>
-                            <Text>{detail.name + '  ' + detail.qty}x</Text>
-                          </Left>
-                          <Right>
-                            <Text>{formatNumber(detail.total)}</Text>
-                          </Right>
-                        </CardItem>
-                      );
-                    })}
-                  </Card>
-                ) : null}
-                <Card style={{marginLeft: 20, marginRight: 20}}>
-                  <CardItem>
-                    <Left>
-                      <Text>Ppn 10%</Text>
-                    </Left>
-                    <Right>
-                      <Text>
-                        {formatNumber(parseInt(this.state.detailData.ppn))}
-                      </Text>
-                    </Right>
-                  </CardItem>
-                  <CardItem>
-                    <Left>
-                      <Text>Total</Text>
-                    </Left>
-                    <Right>
-                      <Text>
-                        {formatNumber(parseInt(this.state.detailData.total))}
-                      </Text>
-                    </Right>
-                  </CardItem>
-                  <CardItem>
-                    <Left>
-                      <Text>Payment</Text>
-                    </Left>
-                    <Right>
-                      <Text>Cash</Text>
-                    </Right>
-                  </CardItem>
-                </Card>
+                {this.state.isLoadingDetail ? (
+                  <Spinner color="blue" style={{height: 500}} />
+                ) : (
+                  <>
+                    <Card style={{marginLeft: 20, marginRight: 20}}>
+                      <CardItem>
+                        <Body>
+                          <Text style={{alignSelf: 'center'}}>
+                            Orders Detail
+                          </Text>
+                          <Text style={{alignSelf: 'center'}}>
+                            {this.state.detailData.order_number}
+                          </Text>
+                          <Text style={{alignSelf: 'center'}}>
+                            {this.state.detailData.name}
+                          </Text>
+                        </Body>
+                      </CardItem>
+                    </Card>
+                    <Card style={{marginLeft: 20, marginRight: 20}}>
+                      {this.state.detailData.products.map(detail => {
+                        return (
+                          <CardItem key={detail.id}>
+                            <Left>
+                              <Text>{detail.name + '  ' + detail.qty}x</Text>
+                            </Left>
+                            <Right>
+                              <Text>{formatNumber(detail.total)}</Text>
+                            </Right>
+                          </CardItem>
+                        );
+                      })}
+                    </Card>
+                    <Card style={{marginLeft: 20, marginRight: 20}}>
+                      <CardItem>
+                        <Left>
+                          <Text>Ppn 10%</Text>
+                        </Left>
+                        <Right>
+                          <Text>
+                            {formatNumber(parseInt(this.state.detailData.ppn))}
+                          </Text>
+                        </Right>
+                      </CardItem>
+                      <CardItem>
+                        <Left>
+                          <Text>Total</Text>
+                        </Left>
+                        <Right>
+                          <Text>
+                            {formatNumber(
+                              parseInt(this.state.detailData.total),
+                            )}
+                          </Text>
+                        </Right>
+                      </CardItem>
+                      <CardItem>
+                        <Left>
+                          <Text>Payment</Text>
+                        </Left>
+                        <Right>
+                          <Text>Cash</Text>
+                        </Right>
+                      </CardItem>
+                    </Card>
+                  </>
+                )}
               </Modal>
             </>
           ) : (

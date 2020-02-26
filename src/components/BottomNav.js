@@ -5,54 +5,54 @@ export class BottomNav extends Component {
   render() {
     return (
       <Footer>
-        <FooterTab>
+        <FooterTab style={{backgroundColor: '#84142D'}}>
           {this.props.home ? (
-            <Button active>
+            <Button active style={{backgroundColor: '#C02739'}}>
               <Icon name="ios-wallet" />
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.replace('Cashier')}>
-              <Icon name="ios-wallet" />
+              onPress={() => this.props.menu.navigation.navigate('Cashier')}>
+              <Icon name="ios-wallet" style={{color: '#fff'}} />
             </Button>
           )}
           {this.props.products ? (
-            <Button active>
+            <Button active style={{backgroundColor: '#C02739'}}>
               <Icon name="ios-cube" />
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.replace('Products')}>
-              <Icon name="ios-cube" />
+              onPress={() => this.props.menu.navigation.navigate('Products')}>
+              <Icon name="ios-cube" style={{color: '#fff'}} />
             </Button>
           )}
           {this.props.categories ? (
-            <Button active>
+            <Button active style={{backgroundColor: '#C02739'}}>
               <Icon name="ios-apps" />
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.replace('Categories')}>
-              <Icon name="ios-apps" />
+              onPress={() => this.props.menu.navigation.navigate('Categories')}>
+              <Icon name="ios-apps" style={{color: '#fff'}} />
             </Button>
           )}
           {this.props.history ? (
-            <Button active>
+            <Button active style={{backgroundColor: '#C02739'}}>
               <Icon name="ios-paper" />
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.replace('History')}>
-              <Icon name="ios-paper" />
+              onPress={() => this.props.menu.navigation.navigate('History')}>
+              <Icon name="ios-paper" style={{color: '#fff'}} />
             </Button>
           )}
           {this.props.users ? (
-            <Button active>
+            <Button active style={{backgroundColor: '#C02739'}}>
               <Icon name="ios-contacts" />
             </Button>
           ) : (
             <Button onPress={() => this.props.menu.navigation.replace('Users')}>
-              <Icon name="ios-contacts" />
+              <Icon name="ios-contacts" style={{color: '#fff'}} />
             </Button>
           )}
         </FooterTab>

@@ -60,7 +60,10 @@ export class Users extends Component {
   removeToken = async () => {
     try {
       await AsyncStorage.removeItem('usertoken');
-    } catch (e) {}
+      await this.props.navigation.replace('Splash');
+    } catch (e) {
+      e;
+    }
   };
 
   getToken = async () => {
@@ -131,6 +134,21 @@ export class Users extends Component {
     });
   };
 
+  alertLogout = () => {
+    Alert.alert(
+      'Warning!',
+      'Are you sure to Logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => this.logOut()},
+      ],
+      {cancelable: false},
+    );
+  };
+
   logOut = () => {
     Axios.post(
       `http://54.173.43.255:1000/api/v1/users/logout`,
@@ -141,7 +159,6 @@ export class Users extends Component {
     )
       .then(res => {
         this.removeToken();
-        this.props.navigation.replace('SignIn');
       })
       .catch(err => {});
   };
@@ -182,7 +199,10 @@ export class Users extends Component {
   render() {
     return (
       <Container>
-        <Header>
+        <Header
+          style={{backgroundColor: '#C02739'}}
+          iosBarStyle="light-content"
+          androidStatusBarColor="#84142D">
           <Left>
             <Button transparent>
               <Icon name="ios-contacts" />
@@ -192,7 +212,7 @@ export class Users extends Component {
             <Title>Users</Title>
           </Body>
           <Right>
-            <Button transparent onPress={() => this.logOut()}>
+            <Button transparent onPress={() => this.alertLogout()}>
               <Icon name="ios-log-out" />
             </Button>
           </Right>

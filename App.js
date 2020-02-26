@@ -6,57 +6,27 @@ import store from './src/redux/store';
 
 import Splash from './src/screens/Splash';
 import SignIn from './src/screens/SignIn';
-import Home from './src/screens/Home';
+import Cashier from './src/screens/Home';
 import Users from './src/screens/Users';
 import Categories from './src/screens/Categories';
 import Products from './src/screens/Products';
 import History from './src/screens/History';
 
-import AsyncStorage from '@react-native-community/async-storage';
-
 export class App extends Component {
-  state = {
-    isLoading: false,
-    userToken: false,
-  };
-
-  componentDidMount() {
-    // setTimeout(() => {
-    //   this.setState({isLoading: false});
-    // }, 1000);
-    this.getData();
-  }
-
-  getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('usertoken');
-      if (value !== null) {
-        this.setState({
-          userToken: true,
-        });
-      }
-    } catch (e) {
-      e;
-    }
-  };
-
   render() {
-    if (this.state.isLoading) {
-      return <Splash />;
-    }
-
     const Stack = createStackNavigator();
 
     return (
       <Provider store={store}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Products"
+            initialRouteName="Splash"
             screenOptions={{
               headerShown: false,
             }}>
+            <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="Cashier" component={Home} />
+            <Stack.Screen name="Cashier" component={Cashier} />
             <Stack.Screen name="Products" component={Products} />
             <Stack.Screen name="Categories" component={Categories} />
             <Stack.Screen name="History" component={History} />
