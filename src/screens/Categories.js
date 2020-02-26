@@ -76,14 +76,29 @@ export class Categories extends Component {
   };
 
   handleRemove = id => {
-    this.props.dispatch(deleteCategories(id, this.state.userToken)).then(() => {
-      const index = this.state.categoriesData.findIndex(function(onData) {
-        return onData.id === id;
+    this.props
+      .dispatch(deleteCategories(id, this.state.userToken))
+      .then(() => {
+        const index = this.state.categoriesData.findIndex(function(onData) {
+          return onData.id === id;
+        });
+        let array = [...this.state.categoriesData];
+        array.splice(index, 1);
+        this.setState({categoriesData: array});
+      })
+      .then(() => {
+        Alert.alert(
+          'Succes!',
+          'Delete data success!',
+          [
+            {
+              text: 'Close',
+              style: 'cancel',
+            },
+          ],
+          {cancelable: false},
+        );
       });
-      let array = [...this.state.categoriesData];
-      array.splice(index, 1);
-      this.setState({categoriesData: array});
-    });
   };
 
   handleUpdate = data => {
@@ -128,33 +143,81 @@ export class Categories extends Component {
   };
 
   handleSubmit = () => {
-    if (this.state.editData.id !== null) {
-      this.props
-        .dispatch(editCategories(this.state.editData, this.state.userToken))
-        .then(() => {
-          let id = this.state.editData.id;
-          const index = this.state.categoriesData.findIndex(function(onData) {
-            return onData.id === id;
-          });
-          let datas = [...this.state.categoriesData];
-          let data = {...datas[index]};
-          data.name = this.state.editData.name;
-          datas[index] = data;
-          this.setState({categoriesData: datas, modal: false});
-        });
+    const formValidation = data => {
+      // eslint-disable-next-line
+      let Regex = /^[a-zA-Z][a-zA-Z ]*$/;
+      return Regex.test(data);
+    };
+
+    if (!formValidation(this.state.editData.name)) {
+      Alert.alert(
+        'Error!',
+        'Categories name must be only word and space!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
     } else {
-      this.props
-        .dispatch(addCategories(this.state.editData.name, this.state.userToken))
-        .then(() => {
-          let newData = {
-            id: this.props.categories.addIdData,
-            name: this.state.editData.name,
-          };
-          this.setState({
-            categoriesData: this.state.categoriesData.concat(newData),
-            modal: false,
+      if (this.state.editData.id !== null) {
+        this.props
+          .dispatch(editCategories(this.state.editData, this.state.userToken))
+          .then(() => {
+            let id = this.state.editData.id;
+            const index = this.state.categoriesData.findIndex(function(onData) {
+              return onData.id === id;
+            });
+            let datas = [...this.state.categoriesData];
+            let data = {...datas[index]};
+            data.name = this.state.editData.name;
+            datas[index] = data;
+            this.setState({categoriesData: datas, modal: false});
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Edit data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
           });
-        });
+      } else {
+        this.props
+          .dispatch(
+            addCategories(this.state.editData.name, this.state.userToken),
+          )
+          .then(() => {
+            let newData = {
+              id: this.props.categories.addIdData,
+              name: this.state.editData.name,
+            };
+            this.setState({
+              categoriesData: this.state.categoriesData.concat(newData),
+              modal: false,
+            });
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Add data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
+          });
+      }
     }
   };
 

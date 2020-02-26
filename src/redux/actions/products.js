@@ -16,11 +16,14 @@ export const addProducts = (editData, token, avatarSource) => {
   bodyFormData.append('price', editData.price);
   bodyFormData.append('stock', editData.stock);
   bodyFormData.append('category_id', editData.category_id);
-  bodyFormData.append('image', {
-    uri: avatarSource.uri,
-    type: 'image/jpeg',
-    name: avatarSource.fileName,
-  });
+  if (avatarSource !== null) {
+    bodyFormData.append('image', {
+      uri: avatarSource.uri,
+      type: 'image/jpeg',
+      name: avatarSource.fileName,
+    });
+  }
+
   return {
     type: 'ADD_PRODUCTS',
     payload: Axios.post(
@@ -43,11 +46,14 @@ export const editProducts = (editData, token, avatarSource) => {
   bodyFormData.append('price', editData.price);
   bodyFormData.append('stock', editData.stock);
   bodyFormData.append('category_id', editData.category_id);
-  bodyFormData.append('image', {
-    uri: avatarSource.uri,
-    type: 'image/jpeg',
-    name: avatarSource.fileName,
-  });
+  if (avatarSource !== null) {
+    bodyFormData.append('image', {
+      uri: avatarSource.uri,
+      type: 'image/jpeg',
+      name: avatarSource.fileName,
+    });
+  }
+
   return {
     type: 'EDIT_PRODUCTS',
     payload: Axios.patch(

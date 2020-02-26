@@ -35,6 +35,7 @@ export class Users extends Component {
     modal: false,
     userToken: '',
     userData: [],
+    isPending: true,
     editData: {
       id: null,
       name: '',
@@ -54,6 +55,7 @@ export class Users extends Component {
     await this.props.dispatch(getUsers(this.state.userToken));
     this.setState({
       userData: this.props.user.userData.result,
+      isPending: false,
     });
   };
 
@@ -95,14 +97,29 @@ export class Users extends Component {
   };
 
   handleRemove = id => {
-    this.props.dispatch(deleteUsers(id, this.state.userToken)).then(() => {
-      const index = this.state.userData.findIndex(function(onData) {
-        return onData.id === id;
+    this.props
+      .dispatch(deleteUsers(id, this.state.userToken))
+      .then(() => {
+        const index = this.state.userData.findIndex(function(onData) {
+          return onData.id === id;
+        });
+        let array = [...this.state.userData];
+        array.splice(index, 1);
+        this.setState({userData: array});
+      })
+      .then(() => {
+        Alert.alert(
+          'Succes!',
+          'Delete data success!',
+          [
+            {
+              text: 'Close',
+              style: 'cancel',
+            },
+          ],
+          {cancelable: false},
+        );
       });
-      let array = [...this.state.userData];
-      array.splice(index, 1);
-      this.setState({userData: array});
-    });
   };
 
   handleFormChange = (key, value) => {
@@ -164,35 +181,117 @@ export class Users extends Component {
   };
 
   handleSubmit = () => {
-    if (this.state.editData.id !== null) {
-      this.props
-        .dispatch(editUsers(this.state.editData, this.state.userToken))
-        .then(() => {
-          let id = this.state.editData.id;
-          const index = this.state.userData.findIndex(function(onData) {
-            return onData.id === id;
-          });
-          let datas = [...this.state.userData];
-          let data = {...datas[index]};
-          data.name = this.state.editData.name;
-          data.email = this.state.editData.email;
-          datas[index] = data;
-          this.setState({userData: datas, modal: false});
-        });
+    const formValidationName = data => {
+      // eslint-disable-next-line
+      let Regex = /^[a-zA-Z][a-zA-Z ]*$/;
+      return Regex.test(data);
+    };
+
+    const formValidationEmail = data => {
+      // eslint-disable-next-line
+      let Regex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+      return Regex.test(data);
+    };
+
+    const formValidationPass = data => {
+      // eslint-disable-next-line
+      let Regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      return Regex.test(data);
+    };
+
+    if (!formValidationName(this.state.editData.name)) {
+      Alert.alert(
+        'Error!',
+        'Name must be only word and space!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else if (!formValidationEmail(this.state.editData.email)) {
+      Alert.alert(
+        'Error!',
+        'Email not valid!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else if (!formValidationPass(this.state.editData.password)) {
+      Alert.alert(
+        'Error!',
+        'Password Minimum 8 characters, at least 1 letter and 1 number!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
     } else {
-      this.props
-        .dispatch(addUsers(this.state.editData, this.state.userToken))
-        .then(() => {
-          let newData = {
-            id: this.props.user.addIdData,
-            name: this.state.editData.name,
-            email: this.state.editData.email,
-          };
-          this.setState({
-            userData: this.state.userData.concat(newData),
-            modal: false,
+      if (this.state.editData.id !== null) {
+        this.props
+          .dispatch(editUsers(this.state.editData, this.state.userToken))
+          .then(() => {
+            let id = this.state.editData.id;
+            const index = this.state.userData.findIndex(function(onData) {
+              return onData.id === id;
+            });
+            let datas = [...this.state.userData];
+            let data = {...datas[index]};
+            data.name = this.state.editData.name;
+            data.email = this.state.editData.email;
+            datas[index] = data;
+            this.setState({userData: datas, modal: false});
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Edit data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
           });
-        });
+      } else {
+        this.props
+          .dispatch(addUsers(this.state.editData, this.state.userToken))
+          .then(() => {
+            let newData = {
+              id: this.props.user.addIdData,
+              name: this.state.editData.name,
+              email: this.state.editData.email,
+            };
+            this.setState({
+              userData: this.state.userData.concat(newData),
+              modal: false,
+            });
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Add data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
+          });
+      }
     }
   };
 
@@ -218,9 +317,10 @@ export class Users extends Component {
           </Right>
         </Header>
         <Content padder>
-          {!this.props.user.isPending ? (
+          {!this.state.isPending ? (
             <>
               <Button
+                success
                 style={{marginBottom: 10}}
                 onPress={() => this.handleAdd()}>
                 <Text>ADD</Text>
@@ -289,6 +389,8 @@ export class Users extends Component {
                       <Item stackedLabel>
                         <Label>Email</Label>
                         <Input
+                          autoCapitalize="none"
+                          autoCompleteType="email"
                           defaultValue={this.state.editData.email}
                           onChangeText={email =>
                             this.handleFormChange('email', email)
@@ -298,6 +400,9 @@ export class Users extends Component {
                       <Item stackedLabel last>
                         <Label>Password</Label>
                         <Input
+                          autoCapitalize="none"
+                          autoCompleteType="password"
+                          secureTextEntry={true}
                           defaultValue={this.state.editData.password}
                           onChangeText={password =>
                             this.handleFormChange('password', password)

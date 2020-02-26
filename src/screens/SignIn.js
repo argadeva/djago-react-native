@@ -76,7 +76,7 @@ class SignIn extends Component {
               marginRight: 20,
             }}>
             <Form>
-              <Item floatingLabel>
+              <Item stackedLabel>
                 <Label>Email</Label>
                 <Input
                   autoCapitalize="none"
@@ -84,7 +84,7 @@ class SignIn extends Component {
                   onChangeText={email => this.setState({email: email})}
                 />
               </Item>
-              <Item floatingLabel last>
+              <Item stackedLabel last>
                 <Label>Password</Label>
                 <Input
                   autoCapitalize="none"

@@ -12,7 +12,7 @@ export class BottomNav extends Component {
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.navigate('Cashier')}>
+              onPress={() => this.props.menu.navigation.replace('Cashier')}>
               <Icon name="ios-wallet" style={{color: '#fff'}} />
             </Button>
           )}
@@ -22,7 +22,7 @@ export class BottomNav extends Component {
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.navigate('Products')}>
+              onPress={() => this.props.menu.navigation.replace('Products')}>
               <Icon name="ios-cube" style={{color: '#fff'}} />
             </Button>
           )}
@@ -32,7 +32,7 @@ export class BottomNav extends Component {
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.navigate('Categories')}>
+              onPress={() => this.props.menu.navigation.replace('Categories')}>
               <Icon name="ios-apps" style={{color: '#fff'}} />
             </Button>
           )}
@@ -42,7 +42,7 @@ export class BottomNav extends Component {
             </Button>
           ) : (
             <Button
-              onPress={() => this.props.menu.navigation.navigate('History')}>
+              onPress={() => this.props.menu.navigation.replace('History')}>
               <Icon name="ios-paper" style={{color: '#fff'}} />
             </Button>
           )}

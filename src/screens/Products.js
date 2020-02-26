@@ -34,6 +34,7 @@ import {Modal, Alert, Image} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import BottomNav from '../components/BottomNav';
 import ImagePicker from 'react-native-image-picker';
+import Logo from '../assets/logo.png';
 
 export class Products extends Component {
   state = {
@@ -45,9 +46,9 @@ export class Products extends Component {
       id: null,
       name: '',
       image: '',
-      price: 0,
+      price: '',
       category_id: null,
-      stock: 0,
+      stock: '',
       description: '',
       categories: '',
     },
@@ -110,14 +111,29 @@ export class Products extends Component {
   };
 
   handleRemove = id => {
-    this.props.dispatch(deleteProducts(id, this.state.userToken)).then(() => {
-      const index = this.state.productData.findIndex(function(onData) {
-        return onData.id === id;
+    this.props
+      .dispatch(deleteProducts(id, this.state.userToken))
+      .then(() => {
+        const index = this.state.productData.findIndex(function(onData) {
+          return onData.id === id;
+        });
+        let array = [...this.state.productData];
+        array.splice(index, 1);
+        this.setState({productData: array, formModal: false});
+      })
+      .then(() => {
+        Alert.alert(
+          'Succes!',
+          'Delete data success!',
+          [
+            {
+              text: 'Close',
+              style: 'cancel',
+            },
+          ],
+          {cancelable: false},
+        );
       });
-      let array = [...this.state.productData];
-      array.splice(index, 1);
-      this.setState({productData: array});
-    });
   };
 
   handleUpdate = data => {
@@ -147,9 +163,9 @@ export class Products extends Component {
         id: null,
         name: '',
         image: '',
-        price: 0,
+        price: '',
         category_id: null,
-        stock: 0,
+        stock: '',
         description: '',
         categories: '',
       },
@@ -189,70 +205,180 @@ export class Products extends Component {
   };
 
   handleSubmit = async () => {
-    if (this.state.editData.id !== null) {
-      this.props
-        .dispatch(
-          editProducts(
-            this.state.editData,
-            this.state.userToken,
-            this.state.avatarSource,
-          ),
-        )
-        .then(() => {
-          let id = this.state.editData.id;
-          const index = this.state.productData.findIndex(function(onData) {
-            return onData.id === id;
-          });
-          let catId = parseInt(this.state.editData.category_id);
-          let index2 = this.state.categoriesData.findIndex(x => x.id === catId);
-          let datas = [...this.state.productData];
-          let data = {...datas[index]};
-          data.name = this.state.editData.name;
-          data.image =
-            this.state.avatarSource.fileName === undefined
-              ? this.state.editData.image
-              : 'http://54.173.43.255:1000/uploads/' +
-                'file-' +
-                this.state.avatarSource.fileName;
-          data.price = this.state.editData.price;
-          data.category_id = this.state.editData.category_id;
-          data.categories = this.state.categoriesData[index2].name;
-          data.stock = this.state.editData.stock;
-          data.description = this.state.editData.description;
-          datas[index] = data;
-          this.setState({productData: datas});
-        });
-    } else {
-      this.props
-        .dispatch(
-          addProducts(
-            this.state.editData,
-            this.state.userToken,
-            this.state.avatarSource,
-          ),
-        )
-        .then(() => {
-          let catId = parseInt(this.state.editData.category_id);
-          let index = this.state.categoriesData.findIndex(x => x.id === catId);
-          let newData = {
-            id: this.props.products.addIdData,
-            name: this.state.editData.name,
-            price: this.state.editData.price,
-            image:
-              this.state.avatarSource.fileName === undefined
-                ? ''
-                : 'http://54.173.43.255:1000/uploads/' +
-                  'file-' +
-                  this.state.avatarSource.fileName,
-            categories: this.state.categoriesData[index].name,
-            stock: this.state.editData.stock,
-            description: this.state.editData.description,
-          };
+    const formValidationText = data => {
+      // eslint-disable-next-line
+      let Regex = /^[a-zA-Z][a-zA-Z- ]*$/;
+      return Regex.test(data);
+    };
 
-          this.setState({
-            productData: this.state.productData.concat(newData),
+    const formValidationNumber = data => {
+      // eslint-disable-next-line
+      let Regex = /^[1-9][0-9]*$/;
+      return Regex.test(data);
+    };
+
+    if (
+      !formValidationText(
+        this.state.editData.name || this.state.editData.description,
+      )
+    ) {
+      Alert.alert(
+        'Error!',
+        'Name or description must be only word and space!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else if (
+      !formValidationNumber(
+        this.state.editData.price && this.state.editData.stock,
+      )
+    ) {
+      Alert.alert(
+        'Error!',
+        'Price or stock must be only minimum 1 positive number!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else if (
+      this.state.editData.category_id === null ||
+      this.state.editData.category_id === ''
+    ) {
+      Alert.alert(
+        'Error!',
+        'Categories must be selected!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else if (
+      this.state.editData.image === '' &&
+      this.state.avatarSource === null
+    ) {
+      Alert.alert(
+        'Error!',
+        'Picture must be add!',
+        [
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ],
+        {cancelable: false},
+      );
+    } else {
+      if (this.state.editData.id !== null) {
+        this.setState({formModal: false});
+        this.props
+          .dispatch(
+            editProducts(
+              this.state.editData,
+              this.state.userToken,
+              this.state.avatarSource,
+            ),
+          )
+          .then(() => {
+            let id = this.state.editData.id;
+            const index = this.state.productData.findIndex(function(onData) {
+              return onData.id === id;
+            });
+            let catId = parseInt(this.state.editData.category_id);
+            let index2 = this.state.categoriesData.findIndex(
+              x => x.id === catId,
+            );
+            let datas = [...this.state.productData];
+            let data = {...datas[index]};
+            data.name = this.state.editData.name;
+            if (this.state.avatarSource !== null) {
+              data.image =
+                this.state.avatarSource.fileName === undefined
+                  ? this.state.editData.image
+                  : 'http://54.173.43.255:1000/uploads/' +
+                    'file-' +
+                    this.state.avatarSource.fileName;
+            }
+            data.price = this.state.editData.price;
+            data.category_id = this.state.editData.category_id;
+            data.categories = this.state.categoriesData[index2].name;
+            data.stock = this.state.editData.stock;
+            data.description = this.state.editData.description;
+            datas[index] = data;
+            this.setState({productData: datas});
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Edit data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
           });
-        });
+      } else {
+        this.setState({formModal: false});
+        this.props
+          .dispatch(
+            addProducts(
+              this.state.editData,
+              this.state.userToken,
+              this.state.avatarSource,
+            ),
+          )
+          .then(() => {
+            let catId = parseInt(this.state.editData.category_id);
+            let index = this.state.categoriesData.findIndex(
+              x => x.id === catId,
+            );
+            let newData = {
+              id: this.props.products.addIdData,
+              name: this.state.editData.name,
+              price: this.state.editData.price,
+              image:
+                this.state.avatarSource === null
+                  ? {Logo}
+                  : 'http://54.173.43.255:1000/uploads/' +
+                    'file-' +
+                    this.state.avatarSource.fileName,
+              categories: this.state.categoriesData[index].name,
+              stock: this.state.editData.stock,
+              description: this.state.editData.description,
+            };
+
+            this.setState({
+              productData: this.state.productData.concat(newData),
+            });
+          })
+          .then(() => {
+            Alert.alert(
+              'Succes!',
+              'Add data success!',
+              [
+                {
+                  text: 'Close',
+                  style: 'cancel',
+                },
+              ],
+              {cancelable: false},
+            );
+          });
+      }
     }
   };
 
