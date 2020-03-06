@@ -12,7 +12,7 @@ import Categories from './src/screens/Categories';
 import Products from './src/screens/Products';
 import History from './src/screens/History';
 
-export class App extends Component {
+class App extends Component {
   render() {
     const Stack = createStackNavigator();
 

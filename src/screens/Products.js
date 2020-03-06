@@ -30,7 +30,7 @@ import {
   deleteProducts,
 } from '../redux/actions/products';
 import {getCategories} from '../redux/actions/categories';
-import {Modal, Alert, Image} from 'react-native';
+import {Modal, Alert} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import BottomNav from '../components/BottomNav';
 import ImagePicker from 'react-native-image-picker';
@@ -119,7 +119,7 @@ export class Products extends Component {
         });
         let array = [...this.state.productData];
         array.splice(index, 1);
-        this.setState({productData: array, formModal: false});
+        this.setState({productData: array, modal: false});
       })
       .then(() => {
         Alert.alert(

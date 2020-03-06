@@ -12,6 +12,7 @@ import {
   Icon,
   Thumbnail,
 } from 'native-base';
+import {Alert} from 'react-native';
 import Axios from 'axios';
 import {StatusBar} from 'react-native';
 import Logo from '../assets/logo.png';
@@ -41,7 +42,17 @@ class SignIn extends Component {
         sendToken();
       })
       .catch(err => {
-        err;
+        Alert.alert(
+          'Failed!',
+          'Email or password not match!',
+          [
+            {
+              text: 'Close',
+              style: 'cancel',
+            },
+          ],
+          {cancelable: false},
+        );
       });
   };
 
