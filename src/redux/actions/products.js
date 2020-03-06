@@ -3,7 +3,7 @@ import Axios from 'axios';
 export const getProducts = token => {
   return {
     type: 'GET_PRODUCTS',
-    payload: Axios.get('http://54.173.43.255:1000/api/v1/products/onstock', {
+    payload: Axios.get('http://18.206.61.46:3000/api/v1/products/onstock', {
       headers: {'x-access-token': token},
     }),
   };
@@ -27,7 +27,7 @@ export const addProducts = (editData, token, avatarSource) => {
   return {
     type: 'ADD_PRODUCTS',
     payload: Axios.post(
-      'http://54.173.43.255:1000/api/v1/products',
+      'http://18.206.61.46:3000/api/v1/products',
       bodyFormData,
       {
         headers: {
@@ -57,7 +57,7 @@ export const editProducts = (editData, token, avatarSource) => {
   return {
     type: 'EDIT_PRODUCTS',
     payload: Axios.patch(
-      `http://54.173.43.255:1000/api/v1/products/${editData.id}`,
+      `http://18.206.61.46:3000/api/v1/products/${editData.id}`,
       bodyFormData,
       {
         headers: {
@@ -72,7 +72,7 @@ export const editProducts = (editData, token, avatarSource) => {
 export const deleteProducts = (id, token) => {
   return {
     type: 'DELETE_PRODUCTS',
-    payload: Axios.delete(`http://54.173.43.255:1000/api/v1/products/${id}`, {
+    payload: Axios.delete(`http://18.206.61.46:3000/api/v1/products/${id}`, {
       headers: {'x-access-token': token},
     }),
   };

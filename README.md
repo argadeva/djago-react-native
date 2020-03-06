@@ -15,3 +15,7 @@ D'Jago React Native is a Mobile App based point of sale system. The main feature
 - Reporting on income today, yearly, and orders weekly.
 
 D'Jago React Native is written in React Native with Redux, it uses Rest API as data storage back-end.
+
+## Demo
+
+![demo](src/assets/demo_djago.gif)

@@ -4,7 +4,7 @@ import qs from 'qs';
 export const getUsers = token => {
   return {
     type: 'GET_USERS',
-    payload: Axios.get(`http://54.173.43.255:1000/api/v1/users`, {
+    payload: Axios.get(`http://18.206.61.46:3000/api/v1/users`, {
       headers: {'x-access-token': token},
     }),
   };
@@ -18,16 +18,12 @@ export const addUsers = (data, token) => {
   });
   return {
     type: 'ADD_USERS',
-    payload: Axios.post(
-      `http://54.173.43.255:1000/api/v1/users`,
-      bodyFormData,
-      {
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-          'x-access-token': token,
-        },
+    payload: Axios.post(`http://18.206.61.46:3000/api/v1/users`, bodyFormData, {
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        'x-access-token': token,
       },
-    ),
+    }),
   };
 };
 
@@ -40,7 +36,7 @@ export const editUsers = (editData, token) => {
   return {
     type: 'EDIT_USERS',
     payload: Axios.patch(
-      `http://54.173.43.255:1000/api/v1/users/${editData.id}`,
+      `http://18.206.61.46:3000/api/v1/users/${editData.id}`,
       bodyFormData,
       {
         headers: {
@@ -55,7 +51,7 @@ export const editUsers = (editData, token) => {
 export const deleteUsers = (id, token) => {
   return {
     type: 'EDIT_CATEGORIES',
-    payload: Axios.delete(`http://54.173.43.255:1000/api/v1/users/${id}`, {
+    payload: Axios.delete(`http://18.206.61.46:3000/api/v1/users/${id}`, {
       headers: {'x-access-token': token},
     }),
   };

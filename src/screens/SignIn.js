@@ -26,7 +26,7 @@ class SignIn extends Component {
   };
 
   login = () => {
-    Axios.post(`http://54.173.43.255:1000/api/v1/users/login`, {
+    Axios.post(`http://18.206.61.46:3000/api/v1/users/login`, {
       email: this.state.email,
       password: this.state.password,
     })

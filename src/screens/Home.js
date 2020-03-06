@@ -138,7 +138,7 @@ export class Home extends Component {
     if (this.state.carts.length !== 0) {
       const number = Date.now();
       await Axios.post(
-        'http://54.173.43.255:1000/api/v1/checkout',
+        'http://18.206.61.46:3000/api/v1/checkout',
         {order_number: number},
         {
           headers: {

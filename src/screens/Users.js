@@ -168,7 +168,7 @@ export class Users extends Component {
 
   logOut = () => {
     Axios.post(
-      `http://54.173.43.255:1000/api/v1/users/logout`,
+      `http://18.206.61.46:3000/api/v1/users/logout`,
       {token: this.state.userToken},
       {
         headers: {'x-access-token': this.state.userToken},

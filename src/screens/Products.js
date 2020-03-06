@@ -306,7 +306,7 @@ export class Products extends Component {
               data.image =
                 this.state.avatarSource.fileName === undefined
                   ? this.state.editData.image
-                  : 'http://54.173.43.255:1000/uploads/' +
+                  : 'http://18.206.61.46:3000/uploads/' +
                     'file-' +
                     this.state.avatarSource.fileName;
             }
@@ -353,7 +353,7 @@ export class Products extends Component {
               image:
                 this.state.avatarSource === null
                   ? {Logo}
-                  : 'http://54.173.43.255:1000/uploads/' +
+                  : 'http://18.206.61.46:3000/uploads/' +
                     'file-' +
                     this.state.avatarSource.fileName,
               categories: this.state.categoriesData[index].name,
