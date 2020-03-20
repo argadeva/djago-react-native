@@ -6,8 +6,6 @@
   <br>
 </h1>
 
-<h4 align="center">D'Jago React Native is a Mobile App based point of sale system. Written in React Native with Redux, it uses Rest API as data storage back-end.</h4>
-
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-v12.14.1-success">
   <img src="https://img.shields.io/badge/ReactNative-v0.61.5-informational">
@@ -15,15 +13,17 @@
   <img src="https://img.shields.io/badge/Redux-v4.0.5-orange">
 </p>
 
-<p align="center">
-  <a href="#feature">Feature</a> •
-  <a href="#demo">Demo</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#release-apk">Release APK</a> •
-  <a href="#related-project ">Related Project</a>
-</p>
+## Table of Contents
 
-## Feature
+- [Introduction](#introduction)
+- [Demo](#demo)
+- [How To Install](#how-to-install)
+- [Release APK](#release-apk)
+- [Related Project](#related-project)
+
+## Introduction
+
+D'Jago React Native is a Mobile App based point of sale system. Written in React Native with Redux, it uses Rest API as data storage back-end. The main features are:
 
 - Login and Register with JWT.
 - User, Categories and Products database.
@@ -34,14 +34,13 @@
 - Search product by name.
 - Sort product by name, category, date updated.
 - Products page pagination
-- Allowed CORS
 - Reporting on income today, yearly, and orders weekly.
 
 ## Demo
 
 ![demo](https://github.com/argadeva/djago-react-native/raw/master/src/assets/demo_djago.gif)
 
-## How To Use
+## How To Install
 
 1. Clone this repository
    ```
@@ -53,7 +52,6 @@
    $ npm install
    ```
 3. Run Debug
-
    ```
    $ react-native run-android
    ```
