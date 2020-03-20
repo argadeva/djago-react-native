@@ -39,7 +39,7 @@ D'Jago React Native is a Mobile App based point of sale system. Written in React
 ## Demo
 
 <p align="center">
-![demo](https://github.com/argadeva/djago-react-native/raw/master/src/assets/demo_djago.gif)
+ <img src="https://github.com/argadeva/djago-react-native/raw/master/src/assets/demo_djago.gif" />
 </p>
 
 ## How To Install
